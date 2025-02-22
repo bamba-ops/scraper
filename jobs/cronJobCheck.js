@@ -1,7 +1,7 @@
 const cron = require('node-cron');
 const axios = require('axios');
 
-cron.schedule('*/2 * * * *', async () => {
+cron.schedule('*/15 * * * *', async () => {
     console.log(`[${new Date().toISOString()}] Lancement du job de scraping...`);
     try {
         const response = await axios.get('http://localhost:3000/api/health');
