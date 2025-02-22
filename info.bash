@@ -28,6 +28,9 @@ npm -v  # Devrait afficher "10.9.2"
 echo "🔄 Mise à jour des paquets et installation de xvfb..."
 apt-get update && apt-get install -y xvfb
 
+echo "🔄 Mise à jour des paquets et installation de playwright..."
+apt-get install -y libnss3 libatk1.0-0 libx11-xcb1 libxcomposite1 libxcursor1 libxdamage1 libxfixes3 libxi6 libxrandr2 libxrender1 libxtst6 libglib2.0-0 libdbus-1-3 libdrm2 libxshmfence1 && npx playwright install chromium --with-deps
+
 echo "🎉 Installation terminée avec succès !"
 EOF
 

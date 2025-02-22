@@ -8,7 +8,7 @@ module.exports = {
         },
         {
             name: 'cron-scrape',
-            script: './jobs/cronJob.js',
+            script: './jobs/cronJobCheck.js',
             instances: 1,
 
         }
