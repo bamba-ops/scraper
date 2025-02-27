@@ -3,58 +3,13 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const { CAT_URL, CAT_FOLDER, CAT_I_VAR } = require('./utils/categories');
+const { cokies } = require('./utils/cookies')
+
 
 setTimeout(async () => {
     console.log(`[${new Date().toISOString()}] Lancement du job de scraping...`);
     // Définition des tableaux de configuration
-    const CAT_URL = [
-        "/fruits-et-legumes",
-        "/produits-laitiers-et-oeufs",
-        "/garde-manger",
-        "/plats-cuisines",
-        "/format-economique",
-        "/boissons",
-        "/bieres-et-vins",
-        "/viandes-et-volailles",
-        "/aliments-vegetariens-et-vegetaliens",
-        "/epicerie-biologique",
-        "/collations",
-        "/produits-surgeles",
-        "/pains-et-patisseries",
-        "/charcuteries-et-plats-prepares",
-        "/poissons-et-fruits-de-mer",
-        "/cuisine-du-monde",
-        "/entretien-menager-et-nettoyage",
-        "/bebe",
-        "/soins-et-beaute",
-        "/essentiels-pour-animaux",
-        "/pharmacie"
-    ];
-    const CAT_FOLDER = [
-        "fruits_et_legumes",
-        "produits-laitiers-et-oeufs",
-        "garde-manger",
-        "plats-cuisines",
-        "format-economique",
-        "boissons",
-        "bieres-et-vins",
-        "viandes-et-volailles",
-        "aliments-vegetariens-et-vegetaliens",
-        "epicerie-biologique",
-        "collations",
-        "produits-surgeles",
-        "pains-et-patisseries",
-        "charcuteries-et-plats-prepares",
-        "poissons-et-fruits-de-mer",
-        "cuisine-du-monde",
-        "entretien-menager-et-nettoyage",
-        "bebe",
-        "soins-et-beaute",
-        "essentiels-pour-animaux",
-        "pharmacie"
-
-    ];
-    const CAT_I_VAR = [30, 40, 130, 10, 15, 55, 40, 20, 20, 26, 70, 40, 30, 42, 12, 15, 30, 5, 20, 12, 8];
     let index = 0;
     // Définition des cookies
     let succes = false;
@@ -62,46 +17,6 @@ setTimeout(async () => {
         let i = 1;
         while (i < CAT_I_VAR[index]) {
             while (!succes) {
-                const cookies = [
-                    {
-                        name: "JSESSIONID",
-                        value: "B5F4AD94F355A0458C20BF40DFCD4668",
-                        url: "https://www.metro.ca",
-                    },
-                    {
-                        name: "METRO_ANONYMOUS_COOKIE",
-                        value: "53221d3b-b05a-4b99-b601-e595ca115f04",
-                        url: "https://www.metro.ca",
-                    },
-                    {
-                        name: "CRITEO_RETAILER_VISITOR_COOKIE",
-                        value: "5ea44f9b-41f2-466a-a495-cd7f44f5be34",
-                        url: "https://www.metro.ca",
-                    },
-                    {
-                        name: "OptanonConsent",
-                        value: "geolocation=CA%3BQC",
-                        url: "https://www.metro.ca",
-                    },
-                    { name: "hprl", value: "fr", url: "https://www.metro.ca" },
-                    { name: "show-store-banner", value: "true", url: "https://www.metro.ca" },
-                    {
-                        name: "APP_D_USER_ID",
-                        value: "EQJEIlyf-2246925667",
-                        url: "https://www.metro.ca",
-                    },
-                    {
-                        name: "coveo_visitorId",
-                        value: "3d05ffed-5cff-4a99-8f53-09de61075719",
-                        url: "https://www.metro.ca",
-                    },
-                    {
-                        name: "__cf_bm",
-                        value:
-                            "pSzJbUBQNSLd9K0QQegt7nBy5ebdGtwZhljQKJtzV4Q-1737902064-1.0.1.1-enBZC1LeiB0DTsJhPf19Y69Mnq0XgMFCKdR5nXxT36smsubAd7OdYb7YmhFn5ZiO3YK6WOAlxldUUub2eSLttOTu2SCWZjWmRhF_g.uYGac",
-                        url: "https://www.metro.ca",
-                    },
-                ];
 
                 // Construction des URLs de base et de page
                 const baseUrl = "https://www.metro.ca/epicerie-en-ligne/allees";
