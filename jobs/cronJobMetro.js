@@ -107,7 +107,7 @@ setTimeout(() => {
                 const baseUrl = "https://www.metro.ca/epicerie-en-ligne/allees";
                 const url = `${baseUrl}${cat_url[index]}`;
                 const url_page = `${baseUrl}${cat_url[index]}-page-${page}`;
-                const server_url = "'http://localhost:3000/api/scrape';
+                const server_url = "http://localhost:3000/api/scrape";
 
                 // Détermine l'URL à scraper selon la page
                 const target_url = page > 1 ? url_page : url;
