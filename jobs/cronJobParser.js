@@ -3,6 +3,7 @@ const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio'); // Installer Cheerio si besoin: npm install cheerio
+const supabase = require('../api/supabase')
 
 function cleanPart(text) {
     // 1) Remove numbers
@@ -361,7 +362,7 @@ setTimeout(async () => {
     }
 
     // Fonction récursive pour parcourir un répertoire et ses sous-répertoires
-    function parseDirectory(directoryPath) {
+    async function parseDirectory(directoryPath) {
         // On liste le contenu du répertoire
         const items = fs.readdirSync(directoryPath);
 
@@ -383,7 +384,83 @@ setTimeout(async () => {
                 console.log(`Fichier analysé : ${fullPath}`);
                 console.log(dataProduct);
                 console.log(dataPrice)
+                await saveProductAndPriceMetro(dataProduct, dataPrice)
             }
+        }
+    }
+
+    async function saveProductAndPriceMetro(dataProduct, dataPrice) {
+        try {
+            console.log('Données avant insertion:', data);
+
+            // 1) Enlever les doublons sur le champ "name_raw"
+            const seen = new Set();
+            const result = [];
+
+            for (const produit of dataProduct) {
+                const value = produit.name_raw;
+                if (!seen.has(value)) {
+                    seen.add(value);
+                    result.push(produit);
+                }
+            }
+
+            // 2) Préparer les données pour l'insertion
+            //    - Séparer le champ "price" vers un tableau à part
+            //    - Ajouter "store_id" et "created_date"
+            const today = new Date().toISOString().split('T')[0]; // format YYYY-MM-DD
+
+            for (const prod of result) {
+                prod.store_id = '32d6dd89-4216-4588-a096-631bfaf5df56';
+                prod.created_date = today;
+            }
+
+            console.log('Début insertion en base de données (table products)...');
+
+            // 3) Insertion en BDD - Table "products"
+            const { data: productsCreated, error: productError } = await supabase
+                .from('products')
+                .upsert(result, {
+                    onConflict: 'store_id,name_raw,created_date'
+                })
+                // .select() si vous voulez récupérer les lignes insérées
+                .select();
+
+            if (productError) {
+                console.error('Erreur lors de l’insertion dans "products":', productError);
+                return; // ou throw productError
+            }
+
+            console.log('Insertion products réussie, produits créés:', productsCreated);
+
+            // 4) Associer l'id du produit inséré aux données de prix
+            if (productsCreated && productsCreated.length > 0) {
+                for (let i = 0; i < productsCreated.length; i++) {
+                    // Ici, on suppose que l’ordre d’insertion correspond à l’ordre dans "prices"
+                    dataPrice[i].product_id = productsCreated[i].id;
+                    dataPrice[i].store_id = '32d6dd89-4216-4588-a096-631bfaf5df56';
+                    dataPrice[i].created_date = today;
+                }
+            }
+
+            // 5) Insertion des prix dans la table "prices"
+            console.log('Insertion des données dans "prices"...');
+            const { data: pricesInserted, error: priceError } = await supabase
+                .from('prices')
+                .upsert(dataPrice, {
+                    onConflict: 'store_id,product_id,created_date'
+                })
+                .select();
+
+            if (priceError) {
+                console.error('Erreur lors de l’insertion dans "prices":', priceError);
+                return;
+            }
+
+            console.log('Insertion prices réussie:', pricesInserted);
+            console.log('Tout est inséré avec succès !');
+        } catch (err) {
+            console.error('Une erreur est survenue:', err);
         }
     }
 
