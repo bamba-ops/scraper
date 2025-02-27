@@ -105,8 +105,8 @@ setTimeout(async () => {
 
                 // Construction des URLs de base et de page
                 const baseUrl = "https://www.metro.ca/epicerie-en-ligne/allees";
-                const url = `${baseUrl}${cat_url[index]}`;
-                const url_page = `${baseUrl}${cat_url[index]}-page-${page}`;
+                const url = `${baseUrl}${CAT_URL[index]}`;
+                const url_page = `${baseUrl}${CAT_URL[index]}-page-${page}`;
                 const server_url = "http://localhost:3000/api/scrape";
 
                 // Détermine l'URL à scraper selon la page
@@ -124,7 +124,7 @@ setTimeout(async () => {
                     console.log(html_content);
 
                     // Dossier de destination
-                    const dossier = path.join("scrap_data", cat_folder[index]);
+                    const dossier = path.join("scrap_data", CAT_FOLDER[index]);
 
                     // Génération d'un nom de fichier unique à l'aide d'un UUID
                     const nom_fichier = `${page}-${uuidv4()}.html`;
