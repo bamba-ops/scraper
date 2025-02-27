@@ -121,7 +121,6 @@ setTimeout(async () => {
                     const response = await axios.post(server_url, payload);
                     const html_content = response.data;
                     console.log("Contenu HTML récupéré :");
-                    console.log(html_content);
 
                     // Dossier de destination
                     const dossier = path.join("scrap_data", CAT_FOLDER[index]);
