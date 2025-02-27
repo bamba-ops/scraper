@@ -243,7 +243,7 @@ setTimeout(async () => {
 
         // If container not found, return empty array
         if (!container || container.length === 0) {
-            //console.log('Aucun produit trouvé.');
+            console.log('Aucun produit trouvé.');
             return data;
         }
 
@@ -314,7 +314,7 @@ setTimeout(async () => {
 
                 // Si priceObj n'existe pas, on "skip" cette itération
                 if (!priceObj) {
-                    //console.log(`priceObj est undefined pour l'index ${i}. On ignore cet élément...`);
+                    console.log(`priceObj est undefined pour l'index ${i}. On ignore cet élément...`);
                     continue; // Passe à l'itération suivante
                 }
 
