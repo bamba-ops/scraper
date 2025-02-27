@@ -171,6 +171,7 @@ setTimeout(async () => {
     // pour extraire les données du HTML. 
     // Vous pouvez la personnaliser selon vos besoins.
     function parseHtmlContent(htmlContent) {
+        const $ = cheerio.load(htmlContent);
         // Equivalent to the Python lists
         const nameValue = [];
         const brandValue = [];
