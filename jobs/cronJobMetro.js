@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
-setTimeout(() => {
+setTimeout(async () => {
     console.log(`[${new Date().toISOString()}] Lancement du job de scraping...`);
     // Définition des tableaux de configuration
     const CAT_URL = [
