@@ -235,7 +235,8 @@ setTimeout(async () => {
         const unitValue = [];
         const imgSrc = [];
         const priceValue = [];
-        const data = [];
+        const dataProduct = [];
+        const dataPrice = [];
         const priceUnValue = [];
 
         // Equivalent to: container = soup.select_one("div.products-search--grid.searchOnlineResults")
@@ -326,12 +327,14 @@ setTimeout(async () => {
                     priceObj.price_un = price_extrait[1];
                     priceObj.quantity = price_extrait[0];
                     priceObj.is_promo = true;
-                    data.push({
+                    dataPrice.push({
+                        priceObj
+                    })
+                    dataProduct.push({
                         name,
                         name_raw,
                         image_url: img,
                         brand,
-                        price: priceObj,
                         unit
                     });
                 } else {
@@ -339,12 +342,14 @@ setTimeout(async () => {
                     //console.log('priceObj avant set :', priceObj);
                     priceObj.price_un = price_extrait;
                     priceObj.is_promo = false;
-                    data.push({
+                    dataPrice.push({
+                        priceObj
+                    })
+                    dataProduct.push({
                         name,
                         name_raw,
                         image_url: img,
                         brand,
-                        price: priceObj,
                         unit
                     });
                 }
@@ -352,7 +357,7 @@ setTimeout(async () => {
             //console.log(data);
         }
 
-        return data;
+        return { dataProduct, dataPrice };
     }
 
     // Fonction récursive pour parcourir un répertoire et ses sous-répertoires
@@ -372,11 +377,12 @@ setTimeout(async () => {
                 const content = fs.readFileSync(fullPath, 'utf8');
 
                 // Extraire les données
-                const extractedData = parseHtmlContent(content);
+                const { dataProduct, dataPrice } = parseHtmlContent(content);
 
                 // Afficher le résultat (ou l'enregistrer dans une base, un fichier JSON, etc.)
                 console.log(`Fichier analysé : ${fullPath}`);
-                console.log(extractedData);
+                console.log(dataProduct);
+                console.log(dataPrice)
             }
         }
     }
