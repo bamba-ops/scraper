@@ -316,8 +316,8 @@ setTimeout(async () => {
                 // Check if the extracted price is an array (promo) or not
                 if (Array.isArray(price_extrait)) {
                     // Example: price_extrait = [quantity, price_un]
-                    priceObj.price_un = price_extrait[1];
-                    priceObj.quantity = price_extrait[0];
+                    priceObj.price_un = price_extrait[1] || undefined;
+                    priceObj.quantity = price_extrait[0] || undefined;
                     priceObj.is_promo = true;
                     data.push({
                         name,
@@ -329,7 +329,7 @@ setTimeout(async () => {
                     });
                 } else {
                     // Non-promo
-                    priceObj.price_un = price_extrait;
+                    priceObj.price_un = price_extrait || undefined;
                     priceObj.is_promo = false;
                     data.push({
                         name,
