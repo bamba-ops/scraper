@@ -297,16 +297,6 @@ setTimeout(async () => {
         }
             */
 
-        // If lengths match, proceed with the final data assembly
-        const minLen = Math.min(
-            nameValue.length,
-            brandValue.length,
-            unitValue.length,
-            imgSrc.length,
-            standardizedPrices.length,
-            priceUnValueExtrait.length
-        );
-        console.log(minLen)
         if (priceValue.length === priceUnValueExtrait.length) {
             const cleanedNameList = clean_name_list(nameValue);
             const standardizedPrices = handle_standardize_units_2(
