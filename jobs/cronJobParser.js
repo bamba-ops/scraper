@@ -306,6 +306,7 @@ setTimeout(async () => {
             standardizedPrices.length,
             priceUnValueExtrait.length
         );
+        console.log(minLen)
         if (priceValue.length === priceUnValueExtrait.length) {
             const cleanedNameList = clean_name_list(nameValue);
             const standardizedPrices = handle_standardize_units_2(
