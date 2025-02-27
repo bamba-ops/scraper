@@ -342,9 +342,9 @@ setTimeout(async () => {
                     //console.log('priceObj avant set :', priceObj);
                     priceObj.price_un = price_extrait;
                     priceObj.is_promo = false;
-                    dataPrice.push({
+                    dataPrice.push(
                         priceObj
-                    })
+                    )
                     dataProduct.push({
                         name,
                         name_raw,
