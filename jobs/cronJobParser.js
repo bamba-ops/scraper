@@ -4,6 +4,63 @@ const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio'); // Installer Cheerio si besoin: npm install cheerio
 
+function cleanPart(text) {
+    // 1) Remove numbers
+    let textWithoutNumbers = text.replace(/\d+/g, '');
+
+    // 2) Remove specific units
+    const unitsToRemove = new Set(['mL', 'L', '%', 'g']);
+    let words = textWithoutNumbers.split(/\s+/);
+
+    // Filter out words that are in `unitsToRemove`
+    words = words.filter((word) => !unitsToRemove.has(word));
+
+    // 3) Remove single-character words
+    words = words.filter((word) => word.length > 1);
+
+    // 4) Rebuild the string
+    return words.join(' ');
+}
+
+/**
+ * Process a single name:
+ *   - If there's a comma, split into two parts.
+ *   - Clean each part separately.
+ *   - Rejoin them only if both parts are non-empty.
+ */
+function cleanName(text) {
+    if (text.includes(',')) {
+        const parts = text.split(',', 2); // split into max 2 parts
+        const before = cleanPart(parts[0]);
+        const after = cleanPart(parts[1]);
+
+        if (before && after) {
+            return `${before}, ${after}`;
+        } else if (before) {
+            return before;
+        } else if (after) {
+            return after;
+        } else {
+            return '';
+        }
+    } else {
+        // No comma, clean the entire string
+        return cleanPart(text);
+    }
+}
+
+/**
+ * Main function: cleans a list of strings by:
+ *   - Removing numbers
+ *   - Stripping out specific units
+ *   - Removing single-character words
+ *   - Handling comma-separated parts
+ */
+function clean_name_list(names) {
+    return names.map(cleanName);
+}
+
+
 function handle_clean_text(text) {
     // Replace multiple whitespace chars (\s+) with a single space, then trim
     return text.replace(/\s+/g, ' ').trim();
