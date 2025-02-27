@@ -298,6 +298,14 @@ setTimeout(async () => {
             */
 
         // If lengths match, proceed with the final data assembly
+        const minLen = Math.min(
+            nameValue.length,
+            brandValue.length,
+            unitValue.length,
+            imgSrc.length,
+            standardizedPrices.length,
+            priceUnValueExtrait.length
+        );
         if (priceValue.length === priceUnValueExtrait.length) {
             const cleanedNameList = clean_name_list(nameValue);
             const standardizedPrices = handle_standardize_units_2(
@@ -312,6 +320,12 @@ setTimeout(async () => {
                 const img = imgSrc[i];
                 const priceObj = standardizedPrices[i];
                 const price_extrait = priceUnValueExtrait[i];
+
+                // Si priceObj n'existe pas, on "skip" cette itération
+                if (!priceObj) {
+                    console.log(`priceObj est undefined pour l'index ${i}. On ignore cet élément...`);
+                    continue; // Passe à l'itération suivante
+                }
 
                 //console.log(priceObj);
 
