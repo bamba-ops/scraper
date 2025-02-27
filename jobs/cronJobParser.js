@@ -291,9 +291,11 @@ setTimeout(async () => {
         const priceUnValueExtrait = extraire_prix_un_metro(priceUnValue);
 
         // Print out the zipped "price" and "price_extrait"
+        /*
         for (let i = 0; i < priceUnValue.length; i++) {
             console.log(`Price: ${priceUnValue[i]}\nPrice Extrait: ${priceUnValueExtrait[i]}`);
         }
+            */
 
         // If lengths match, proceed with the final data assembly
         if (priceValue.length === priceUnValueExtrait.length) {
@@ -311,7 +313,7 @@ setTimeout(async () => {
                 const priceObj = standardizedPrices[i];
                 const price_extrait = priceUnValueExtrait[i];
 
-                console.log(priceObj);
+                //console.log(priceObj);
 
                 // Check if the extracted price is an array (promo) or not
                 if (Array.isArray(price_extrait)) {
