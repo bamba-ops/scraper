@@ -125,10 +125,6 @@ function separatePriceUnits(line) {
  *    - Skip any matches with "lb" in the unit
  */
 function handleExtractPricesMetro2(data) {
-    /**
-     * Python pattern: r"(\d+,\d+)\s*\$\s*/(\w +) \.?"
-        * re.IGNORECASE
-        */
     const pattern = new RegExp('(\\d+,\\d+)\\s*\\$\\s*/(\\w+)\\.?', 'i');
 
     const cleanedData = [];
