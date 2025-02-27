@@ -391,7 +391,7 @@ setTimeout(async () => {
 
     async function saveProductAndPriceMetro(dataProduct, dataPrice) {
         try {
-            console.log('Données avant insertion:', data);
+            console.log('Données avant insertion');
 
             // 1) Enlever les doublons sur le champ "name_raw"
             const seen = new Set();
