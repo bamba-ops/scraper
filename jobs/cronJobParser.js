@@ -4,12 +4,12 @@ const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio'); // Installer Cheerio si besoin: npm install cheerio
 
-function handleCleanText(text) {
+function handle_clean_text(text) {
     // Replace multiple whitespace chars (\s+) with a single space, then trim
     return text.replace(/\s+/g, ' ').trim();
 }
 
-function handleExtractUnitAndValue(inputString) {
+function handle_extract_unit_and_value(inputString) {
     // Common measurement units
     const units = ["g", "kg", "ml", "l", "cm", "m", "km", "oz", "lb", "x"];
 
@@ -33,7 +33,7 @@ function handleExtractUnitAndValue(inputString) {
     return "";
 }
 
-function extrairePrixUnMetro(listePrix) {
+function extraire_prix_un_metro(listePrix) {
     const prixExtraits = [];
 
     for (const element of listePrix) {
@@ -57,7 +57,7 @@ function extrairePrixUnMetro(listePrix) {
     return prixExtraits;
 }
 
-function handleStandardizeUnits2(data) {
+function handle_standardize_units_2(data) {
     for (const item of data) {
         // Convert the unit to lowercase for comparison
         const unitLower = (item.unit || '').toLowerCase();
@@ -124,7 +124,7 @@ function separatePriceUnits(line) {
  *    - Ignore "... $ ch." (handled by removeChPrices)
  *    - Skip any matches with "lb" in the unit
  */
-function handleExtractPricesMetro2(data) {
+function handle_extract_prices_metro_2(data) {
     const pattern = new RegExp('(\\d+,\\d+)\\s*\\$\\s*/(\\w+)\\.?', 'i');
 
     const cleanedData = [];
