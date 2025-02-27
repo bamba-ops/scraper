@@ -57,7 +57,7 @@ function extrairePrixUnMetro(listePrix) {
     return prixExtraits;
 }
 
-unction handleStandardizeUnits2(data) {
+function handleStandardizeUnits2(data) {
     for (const item of data) {
         // Convert the unit to lowercase for comparison
         const unitLower = (item.unit || '').toLowerCase();
