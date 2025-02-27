@@ -314,7 +314,7 @@ setTimeout(async () => {
 
                 // Si priceObj n'existe pas, on "skip" cette itération
                 if (!priceObj) {
-                    console.log(`priceObj est undefined pour l'index ${i}. On ignore cet élément...`);
+                    //console.log(`priceObj est undefined pour l'index ${i}. On ignore cet élément...`);
                     continue; // Passe à l'itération suivante
                 }
 
@@ -376,7 +376,7 @@ setTimeout(async () => {
 
                 // Afficher le résultat (ou l'enregistrer dans une base, un fichier JSON, etc.)
                 console.log(`Fichier analysé : ${fullPath}`);
-                //console.log(extractedData);
+                console.log(extractedData);
             }
         }
     }
