@@ -365,7 +365,8 @@ setTimeout(async () => {
     async function parseDirectory(directoryPath) {
         // On liste le contenu du répertoire
         const items = fs.readdirSync(directoryPath);
-
+        let _dataProduct = []
+        let _dataPrice = []
         for (const item of items) {
             const fullPath = path.join(directoryPath, item);
             const stats = fs.statSync(fullPath);
@@ -383,10 +384,12 @@ setTimeout(async () => {
                 // Afficher le résultat (ou l'enregistrer dans une base, un fichier JSON, etc.)
                 console.log(`Fichier analysé : ${fullPath}`);
                 console.log(dataProduct);
-                console.log(dataPrice)
-                await saveProductAndPriceMetro(dataProduct, dataPrice)
+                console.log(dataPrice);
+                _dataProduct.push(...dataProduct)
+                _dataPrice.push(...dataPrice)
             }
         }
+        await saveProductAndPriceMetro(_dataProduct, _dataPrice)
     }
 
     async function saveProductAndPriceMetro(dataProduct, dataPrice) {
