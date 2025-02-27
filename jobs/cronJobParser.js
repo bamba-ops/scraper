@@ -328,37 +328,33 @@ setTimeout(async () => {
                     priceObj.price_un = price_extrait[1];
                     priceObj.quantity = price_extrait[0];
                     priceObj.is_promo = true;
-                    dataPrice.push(
-                        priceObj
-                    )
                     dataProduct.push({
                         name,
                         name_raw,
                         image_url: img,
                         brand,
-                        unit
+                        unit,
+                        priceObj
                     });
                 } else {
                     // Non-promo
                     //console.log('priceObj avant set :', priceObj);
                     priceObj.price_un = price_extrait;
                     priceObj.is_promo = false;
-                    dataPrice.push(
-                        priceObj
-                    )
                     dataProduct.push({
                         name,
                         name_raw,
                         image_url: img,
                         brand,
-                        unit
+                        unit,
+                        priceObj
                     });
                 }
             }
             //console.log(data);
         }
 
-        return { dataProduct, dataPrice };
+        return { dataProduct };
     }
 
     // Fonction récursive pour parcourir un répertoire et ses sous-répertoires
@@ -366,7 +362,6 @@ setTimeout(async () => {
         // On liste le contenu du répertoire
         const items = fs.readdirSync(directoryPath);
         let _dataProduct = []
-        let _dataPrice = []
         for (const item of items) {
             const fullPath = path.join(directoryPath, item);
             const stats = fs.statSync(fullPath);
@@ -379,23 +374,21 @@ setTimeout(async () => {
                 const content = fs.readFileSync(fullPath, 'utf8');
 
                 // Extraire les données
-                const { dataProduct, dataPrice } = parseHtmlContent(content);
+                const { dataProduct } = parseHtmlContent(content);
 
                 // Afficher le résultat (ou l'enregistrer dans une base, un fichier JSON, etc.)
                 console.log(`Fichier analysé : ${fullPath}`);
                 console.log(dataProduct);
-                console.log(dataPrice);
                 _dataProduct.push(...dataProduct)
-                _dataPrice.push(...dataPrice)
             }
         }
-        await saveProductAndPriceMetro(_dataProduct, _dataPrice)
+        await saveProductAndPriceMetro(_dataProduct)
     }
 
-    async function saveProductAndPriceMetro(dataProduct, dataPrice) {
+    async function saveProductAndPriceMetro(dataProduct) {
         try {
             console.log('Données avant insertion');
-
+            let dataPrice = []
             // 1) Enlever les doublons sur le champ "name_raw"
             const seen = new Set();
             const result = [];
@@ -414,6 +407,8 @@ setTimeout(async () => {
             const today = new Date().toISOString().split('T')[0]; // format YYYY-MM-DD
 
             for (const prod of result) {
+                dataPrice.push(prod.priceObj)
+                delete prod.priceObj
                 prod.store_id = '32d6dd89-4216-4588-a096-631bfaf5df56';
                 prod.created_date = today;
             }
