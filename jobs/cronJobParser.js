@@ -245,7 +245,7 @@ setTimeout(async () => {
         // If container not found, return empty array
         if (!container || container.length === 0) {
             console.log('Aucun produit trouvé.');
-            return data;
+            return { dataProduct, dataPrice };
         }
 
         // Equivalent to the Python "select" calls
@@ -327,9 +327,9 @@ setTimeout(async () => {
                     priceObj.price_un = price_extrait[1];
                     priceObj.quantity = price_extrait[0];
                     priceObj.is_promo = true;
-                    dataPrice.push({
+                    dataPrice.push(
                         priceObj
-                    })
+                    )
                     dataProduct.push({
                         name,
                         name_raw,
