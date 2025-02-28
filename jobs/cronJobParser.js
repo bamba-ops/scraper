@@ -322,33 +322,35 @@ setTimeout(async () => {
 
                 //console.log(priceObj);
 
-                // Check if the extracted price is an array (promo) or not
-                if (Array.isArray(price_extrait)) {
-                    // Example: price_extrait = [quantity, price_un]
-                    priceObj.price_un = price_extrait[1];
-                    priceObj.quantity = price_extrait[0];
-                    priceObj.is_promo = true;
-                    dataProduct.push({
-                        name,
-                        name_raw,
-                        image_url: img,
-                        brand,
-                        unit,
-                        priceObj
-                    });
-                } else {
-                    // Non-promo
-                    //console.log('priceObj avant set :', priceObj);
-                    priceObj.price_un = price_extrait;
-                    priceObj.is_promo = false;
-                    dataProduct.push({
-                        name,
-                        name_raw,
-                        image_url: img,
-                        brand,
-                        unit,
-                        priceObj
-                    });
+                if (name && name_raw && priceObj) {
+                    // Check if the extracted price is an array (promo) or not
+                    if (Array.isArray(price_extrait)) {
+                        // Example: price_extrait = [quantity, price_un]
+                        priceObj.price_un = price_extrait[1];
+                        priceObj.quantity = price_extrait[0];
+                        priceObj.is_promo = true;
+                        dataProduct.push({
+                            name,
+                            name_raw,
+                            image_url: img,
+                            brand,
+                            unit,
+                            priceObj
+                        });
+                    } else {
+                        // Non-promo
+                        //console.log('priceObj avant set :', priceObj);
+                        priceObj.price_un = price_extrait;
+                        priceObj.is_promo = false;
+                        dataProduct.push({
+                            name,
+                            name_raw,
+                            image_url: img,
+                            brand,
+                            unit,
+                            priceObj
+                        });
+                    }
                 }
             }
             //console.log(data);
@@ -429,7 +431,7 @@ setTimeout(async () => {
                 return; // ou throw productError
             }
 
-            console.log('Insertion products réussie, produits créés:', productsCreated);
+            console.log('Insertion products réussie, produits créés');
 
             // 4) Associer l'id du produit inséré aux données de prix
             if (productsCreated && productsCreated.length > 0) {
@@ -455,7 +457,7 @@ setTimeout(async () => {
                 return;
             }
 
-            console.log('Insertion prices réussie:', pricesInserted);
+            console.log('Insertion prices réussie:');
             console.log('Tout est inséré avec succès !');
         } catch (err) {
             console.error('Une erreur est survenue:', err);
