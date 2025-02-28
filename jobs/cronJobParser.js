@@ -322,7 +322,7 @@ setTimeout(async () => {
 
                 //console.log(priceObj);
 
-                if (name && name_raw && priceObj) {
+                if (name && priceObj) {
                     // Check if the extracted price is an array (promo) or not
                     if (Array.isArray(price_extrait)) {
                         // Example: price_extrait = [quantity, price_un]
