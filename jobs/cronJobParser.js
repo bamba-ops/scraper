@@ -221,262 +221,263 @@ function handle_extract_prices_metro_2(data) {
 
 
 
-setTimeout(async () => {
-    console.log(`[${new Date().toISOString()}] Lancement du job de scraping...`);
 
-    // Répertoire racine à parcourir
-    const baseDir = '/home/w_gharbi_tangerine/scraper/jobs/scrap_data';
+console.log(`[${new Date().toISOString()}] Lancement du job de scraping...`);
 
-    // Fonction de parsing: c'est ici que vous implémentez votre logique 
-    // pour extraire les données du HTML. 
-    // Vous pouvez la personnaliser selon vos besoins.
-    function parseHtmlContent(htmlContent) {
-        const $ = cheerio.load(htmlContent);
-        // Equivalent to the Python lists
-        const nameValue = [];
-        const brandValue = [];
-        const unitValue = [];
-        const imgSrc = [];
-        const priceValue = [];
-        const dataProduct = [];
-        const dataPrice = [];
-        const priceUnValue = [];
+// Répertoire racine à parcourir
+const baseDir = '/home/w_gharbi_tangerine/scraper/jobs/scrap_data';
 
-        // Equivalent to: container = soup.select_one("div.products-search--grid.searchOnlineResults")
-        const container = $('div.products-search--grid.searchOnlineResults');
+// Fonction de parsing: c'est ici que vous implémentez votre logique 
+// pour extraire les données du HTML. 
+// Vous pouvez la personnaliser selon vos besoins.
+function parseHtmlContent(htmlContent) {
+    const $ = cheerio.load(htmlContent);
+    // Equivalent to the Python lists
+    const nameValue = [];
+    const brandValue = [];
+    const unitValue = [];
+    const imgSrc = [];
+    const priceValue = [];
+    const dataProduct = [];
+    const dataPrice = [];
+    const priceUnValue = [];
 
-        // If container not found, return empty array
-        if (!container || container.length === 0) {
-            console.log('Aucun produit trouvé.');
-            return { dataProduct, dataPrice };
-        }
+    // Equivalent to: container = soup.select_one("div.products-search--grid.searchOnlineResults")
+    const container = $('div.products-search--grid.searchOnlineResults');
 
-        // Equivalent to the Python "select" calls
-        const pictureElements = container.find('picture.defaultable-picture');
-        const nameElements = container.find('div.content__head');
-        const priceElements = container.find('div.pricing__secondary-price');
-        const priceUnElements = container.find('div.pricing__sale-price');
+    // If container not found, return empty array
+    if (!container || container.length === 0) {
+        console.log('Aucun produit trouvé.');
+        return { dataProduct, dataPrice };
+    }
 
-        // -- 1) Loop over name elements --
-        nameElements.each((_, el) => {
-            const _title_unit = $(el).find('a');
-            const _brand = $(el).find('span');
-            if (_brand.length > 0 || _title_unit.length > 0) {
-                nameValue.push(handle_clean_text(_title_unit.text().trim()));
-                brandValue.push(handle_clean_text(_brand.text().trim()));
-                unitValue.push(
-                    handle_extract_unit_and_value(
-                        handle_clean_text(_title_unit.text().trim())
-                    )
-                );
-            }
-        });
+    // Equivalent to the Python "select" calls
+    const pictureElements = container.find('picture.defaultable-picture');
+    const nameElements = container.find('div.content__head');
+    const priceElements = container.find('div.pricing__secondary-price');
+    const priceUnElements = container.find('div.pricing__sale-price');
 
-        // -- 2) Loop over picture elements --
-        pictureElements.each((_, el) => {
-            const img = $(el).find('img');
-            if (img && img.attr('src')) {
-                imgSrc.push(img.attr('src'));
-            }
-        });
-
-        // -- 3) Loop over price elements --
-        priceElements.each((_, el) => {
-            // Python code uses price.text -> the entire text inside that element
-            priceValue.push($(el).text());
-        });
-
-        // -- 4) Loop over price_un elements --
-        priceUnElements.each((_, el) => {
-            priceUnValue.push(handle_clean_text($(el).text()));
-        });
-
-        // Equivalent to price_un_value_extrait = extraire_prix_un_metro(price_un_value)
-        const priceUnValueExtrait = extraire_prix_un_metro(priceUnValue);
-
-        // Print out the zipped "price" and "price_extrait"
-        /*
-        for (let i = 0; i < priceUnValue.length; i++) {
-            console.log(`Price: ${priceUnValue[i]}\nPrice Extrait: ${priceUnValueExtrait[i]}`);
-        }
-            */
-
-        if (priceValue.length === priceUnValueExtrait.length) {
-            const cleanedNameList = clean_name_list(nameValue);
-            const standardizedPrices = handle_standardize_units_2(
-                handle_extract_prices_metro_2(priceValue)
+    // -- 1) Loop over name elements --
+    nameElements.each((_, el) => {
+        const _title_unit = $(el).find('a');
+        const _brand = $(el).find('span');
+        if (_brand.length > 0 || _title_unit.length > 0) {
+            nameValue.push(handle_clean_text(_title_unit.text().trim()));
+            brandValue.push(handle_clean_text(_brand.text().trim()));
+            unitValue.push(
+                handle_extract_unit_and_value(
+                    handle_clean_text(_title_unit.text().trim())
+                )
             );
+        }
+    });
 
-            for (let i = 0; i < priceValue.length; i++) {
-                const name = cleanedNameList[i];
-                const name_raw = nameValue[i];
-                const brand = brandValue[i];
-                const unit = unitValue[i];
-                const img = imgSrc[i];
-                const priceObj = standardizedPrices[i];
-                const price_extrait = priceUnValueExtrait[i];
+    // -- 2) Loop over picture elements --
+    pictureElements.each((_, el) => {
+        const img = $(el).find('img');
+        if (img && img.attr('src')) {
+            imgSrc.push(img.attr('src'));
+        }
+    });
 
-                // Si priceObj n'existe pas, on "skip" cette itération
-                if (!priceObj) {
-                    //console.log(`priceObj est undefined pour l'index ${i}. On ignore cet élément...`);
-                    continue; // Passe à l'itération suivante
-                }
+    // -- 3) Loop over price elements --
+    priceElements.each((_, el) => {
+        // Python code uses price.text -> the entire text inside that element
+        priceValue.push($(el).text());
+    });
 
-                //console.log(priceObj);
+    // -- 4) Loop over price_un elements --
+    priceUnElements.each((_, el) => {
+        priceUnValue.push(handle_clean_text($(el).text()));
+    });
 
-                if (name && priceObj) {
-                    // Check if the extracted price is an array (promo) or not
-                    if (Array.isArray(price_extrait)) {
-                        // Example: price_extrait = [quantity, price_un]
-                        priceObj.price_un = price_extrait[1];
-                        priceObj.quantity = price_extrait[0];
-                        priceObj.is_promo = true;
-                        dataProduct.push({
-                            name,
-                            name_raw,
-                            image_url: img,
-                            brand,
-                            unit,
-                            priceObj
-                        });
-                    } else {
-                        // Non-promo
-                        //console.log('priceObj avant set :', priceObj);
-                        priceObj.price_un = price_extrait;
-                        priceObj.is_promo = false;
-                        dataProduct.push({
-                            name,
-                            name_raw,
-                            image_url: img,
-                            brand,
-                            unit,
-                            priceObj
-                        });
-                    }
+    // Equivalent to price_un_value_extrait = extraire_prix_un_metro(price_un_value)
+    const priceUnValueExtrait = extraire_prix_un_metro(priceUnValue);
+
+    // Print out the zipped "price" and "price_extrait"
+    /*
+    for (let i = 0; i < priceUnValue.length; i++) {
+        console.log(`Price: ${priceUnValue[i]}\nPrice Extrait: ${priceUnValueExtrait[i]}`);
+    }
+        */
+
+    if (priceValue.length === priceUnValueExtrait.length) {
+        const cleanedNameList = clean_name_list(nameValue);
+        const standardizedPrices = handle_standardize_units_2(
+            handle_extract_prices_metro_2(priceValue)
+        );
+
+        for (let i = 0; i < priceValue.length; i++) {
+            const name = cleanedNameList[i];
+            const name_raw = nameValue[i];
+            const brand = brandValue[i];
+            const unit = unitValue[i];
+            const img = imgSrc[i];
+            const priceObj = standardizedPrices[i];
+            const price_extrait = priceUnValueExtrait[i];
+
+            // Si priceObj n'existe pas, on "skip" cette itération
+            if (!priceObj) {
+                //console.log(`priceObj est undefined pour l'index ${i}. On ignore cet élément...`);
+                continue; // Passe à l'itération suivante
+            }
+
+            //console.log(priceObj);
+
+            if (name && priceObj) {
+                // Check if the extracted price is an array (promo) or not
+                if (Array.isArray(price_extrait)) {
+                    // Example: price_extrait = [quantity, price_un]
+                    priceObj.price_un = price_extrait[1];
+                    priceObj.quantity = price_extrait[0];
+                    priceObj.is_promo = true;
+                    dataProduct.push({
+                        name,
+                        name_raw,
+                        image_url: img,
+                        brand,
+                        unit,
+                        priceObj
+                    });
+                } else {
+                    // Non-promo
+                    //console.log('priceObj avant set :', priceObj);
+                    priceObj.price_un = price_extrait;
+                    priceObj.is_promo = false;
+                    dataProduct.push({
+                        name,
+                        name_raw,
+                        image_url: img,
+                        brand,
+                        unit,
+                        priceObj
+                    });
                 }
             }
-            //console.log(data);
         }
-
-        return { dataProduct };
+        //console.log(data);
     }
 
-    async function processFolders() {
-        for (const folder of CAT_FOLDER) {
-            const folderPath = path.join(baseDir, folder);
-            console.log(`Traitement du dossier: ${folderPath}`);
+    return { dataProduct };
+}
 
-            // Accumule les produits extraits du dossier courant
-            let folderProducts = [];
+async function processFolders() {
+    for (const folder of CAT_FOLDER) {
+        const folderPath = path.join(baseDir, folder);
+        console.log(`Traitement du dossier: ${folderPath}`);
 
-            // On liste tous les éléments du dossier
-            const items = fs.readdirSync(folderPath);
-            for (const item of items) {
-                const fullPath = path.join(folderPath, item);
-                const stats = fs.statSync(fullPath);
+        // Accumule les produits extraits du dossier courant
+        let folderProducts = [];
 
-                // On traite uniquement les fichiers HTML
-                if (stats.isFile() && path.extname(item) === '.html') {
-                    const content = fs.readFileSync(fullPath, 'utf8');
-                    const { dataProduct } = parseHtmlContent(content);
-                    console.log(`Fichier analysé : ${fullPath}`);
-                    //console.log(dataProduct);
-                    folderProducts.push(...dataProduct);
-                }
-            }
+        // On liste tous les éléments du dossier
+        const items = fs.readdirSync(folderPath);
+        for (const item of items) {
+            const fullPath = path.join(folderPath, item);
+            const stats = fs.statSync(fullPath);
 
-            // Insertion des données extraites pour le dossier courant (si elles existent)
-            if (folderProducts.length > 0) {
-                //console.log(`Insertion des données du dossier ${folderPath}`);
-                await saveProductAndPriceMetro(folderProducts);
-            } else {
-                console.log(`Aucune donnée trouvée dans le dossier ${folderPath}`);
+            // On traite uniquement les fichiers HTML
+            if (stats.isFile() && path.extname(item) === '.html') {
+                const content = fs.readFileSync(fullPath, 'utf8');
+                const { dataProduct } = parseHtmlContent(content);
+                console.log(`Fichier analysé : ${fullPath}`);
+                //console.log(dataProduct);
+                folderProducts.push(...dataProduct);
             }
         }
-    }
 
-    async function saveProductAndPriceMetro(dataProduct) {
-        try {
-            console.log('Données avant insertion');
-            let dataPrice = []
-            // 1) Enlever les doublons sur le champ "name_raw"
-            const seen = new Set();
-            const result = [];
-
-            for (const produit of dataProduct) {
-                const value = produit.name_raw;
-                if (!seen.has(value)) {
-                    seen.add(value);
-                    result.push(produit);
-                }
-            }
-
-            // 2) Préparer les données pour l'insertion
-            //    - Séparer le champ "price" vers un tableau à part
-            //    - Ajouter "store_id" et "created_date"
-            const today = new Date().toISOString().split('T')[0]; // format YYYY-MM-DD
-
-            for (const prod of result) {
-                dataPrice.push(prod.priceObj)
-                delete prod.priceObj
-                prod.store_id = '32d6dd89-4216-4588-a096-631bfaf5df56';
-                prod.created_date = today;
-            }
-
-            console.log('Début insertion en base de données (table products)...');
-
-            // 3) Insertion en BDD - Table "products"
-            const { data: productsCreated, error: productError } = await supabase
-                .from('products')
-                .upsert(result, {
-                    onConflict: 'store_id,name_raw,created_date'
-                })
-                // .select() si vous voulez récupérer les lignes insérées
-                .select();
-
-            if (productError) {
-                console.error('Erreur lors de l’insertion dans "products":', productError);
-                return; // ou throw productError
-            }
-
-            console.log('Insertion products réussie, produits créés');
-
-            // 4) Associer l'id du produit inséré aux données de prix
-            if (productsCreated && productsCreated.length > 0) {
-                for (let i = 0; i < productsCreated.length; i++) {
-                    // Ici, on suppose que l’ordre d’insertion correspond à l’ordre dans "prices"
-                    dataPrice[i].product_id = productsCreated[i].id;
-                    dataPrice[i].store_id = '32d6dd89-4216-4588-a096-631bfaf5df56';
-                    dataPrice[i].created_date = today;
-                }
-            }
-
-            // 5) Insertion des prix dans la table "prices"
-            console.log('Insertion des données dans "prices"...');
-            const { data: pricesInserted, error: priceError } = await supabase
-                .from('prices')
-                .upsert(dataPrice, {
-                    onConflict: 'store_id,product_id,created_date'
-                })
-                .select();
-
-            if (priceError) {
-                console.error('Erreur lors de l’insertion dans "prices":', priceError);
-                return;
-            }
-
-            console.log('Insertion prices réussie:');
-            console.log('Tout est inséré avec succès !');
-        } catch (err) {
-            console.error('Une erreur est survenue:', err);
+        // Insertion des données extraites pour le dossier courant (si elles existent)
+        if (folderProducts.length > 0) {
+            //console.log(`Insertion des données du dossier ${folderPath}`);
+            await saveProductAndPriceMetro(folderProducts);
+        } else {
+            console.log(`Aucune donnée trouvée dans le dossier ${folderPath}`);
         }
     }
+}
 
+async function saveProductAndPriceMetro(dataProduct) {
+    try {
+        console.log('Données avant insertion');
+        let dataPrice = []
+        // 1) Enlever les doublons sur le champ "name_raw"
+        const seen = new Set();
+        const result = [];
+
+        for (const produit of dataProduct) {
+            const value = produit.name_raw;
+            if (!seen.has(value)) {
+                seen.add(value);
+                result.push(produit);
+            }
+        }
+
+        // 2) Préparer les données pour l'insertion
+        //    - Séparer le champ "price" vers un tableau à part
+        //    - Ajouter "store_id" et "created_date"
+        const today = new Date().toISOString().split('T')[0]; // format YYYY-MM-DD
+
+        for (const prod of result) {
+            dataPrice.push(prod.priceObj)
+            delete prod.priceObj
+            prod.store_id = '32d6dd89-4216-4588-a096-631bfaf5df56';
+            prod.created_date = today;
+        }
+
+        console.log('Début insertion en base de données (table products)...');
+
+        // 3) Insertion en BDD - Table "products"
+        const { data: productsCreated, error: productError } = await supabase
+            .from('products')
+            .upsert(result, {
+                onConflict: 'store_id,name_raw,created_date'
+            })
+            // .select() si vous voulez récupérer les lignes insérées
+            .select();
+
+        if (productError) {
+            console.error('Erreur lors de l’insertion dans "products":', productError);
+            return; // ou throw productError
+        }
+
+        console.log('Insertion products réussie, produits créés');
+
+        // 4) Associer l'id du produit inséré aux données de prix
+        if (productsCreated && productsCreated.length > 0) {
+            for (let i = 0; i < productsCreated.length; i++) {
+                // Ici, on suppose que l’ordre d’insertion correspond à l’ordre dans "prices"
+                dataPrice[i].product_id = productsCreated[i].id;
+                dataPrice[i].store_id = '32d6dd89-4216-4588-a096-631bfaf5df56';
+                dataPrice[i].created_date = today;
+            }
+        }
+
+        // 5) Insertion des prix dans la table "prices"
+        console.log('Insertion des données dans "prices"...');
+        const { data: pricesInserted, error: priceError } = await supabase
+            .from('prices')
+            .upsert(dataPrice, {
+                onConflict: 'store_id,product_id,created_date'
+            })
+            .select();
+
+        if (priceError) {
+            console.error('Erreur lors de l’insertion dans "prices":', priceError);
+            return;
+        }
+
+        console.log('Insertion prices réussie:');
+        console.log('Tout est inséré avec succès !');
+    } catch (err) {
+        console.error('Une erreur est survenue:', err);
+    }
+}
+
+cron.schedule('0 0 * * *', async () => {
+    console.log(`[${new Date().toISOString()}] Lancement du job de parser...`);
     // Exécuter le script
-    processFolders();
+    await processFolders();
 
+});
 
+console.log(`[${new Date().toISOString()}] Job de parser lancé.`);
 
-}, 10000);
-
-//console.log(`[${new Date().toISOString()}] Job de scraping lancé.`);

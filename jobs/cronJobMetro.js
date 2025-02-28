@@ -7,8 +7,8 @@ const { CAT_URL, CAT_FOLDER, CAT_I_VAR } = require('./utils/categories');
 const { cokies } = require('./utils/cookies')
 
 
-setTimeout(async () => {
-    console.log(`[${new Date().toISOString()}] Lancement du job de scraping...`);
+cron.schedule('0 23 * * *', async () => {
+    console.log(`[${new Date().toISOString()}] Lancement du job de metro...`);
     // Définition des tableaux de configuration
     let index = 0;
     // Définition des cookies
@@ -81,6 +81,6 @@ setTimeout(async () => {
 
     }
 
-}, 10000);
+});
 
-//console.log(`[${new Date().toISOString()}] Job de scraping lancé.`);
+console.log(`[${new Date().toISOString()}] Job de metro lancé.`);
