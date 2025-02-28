@@ -473,7 +473,7 @@ setTimeout(async () => {
     }
 
     // Exécuter le script
-    parseDirectory(baseDir);
+    processFolders();
 
 
 
