@@ -4,6 +4,8 @@ const fs = require('fs');
 const path = require('path');
 const cheerio = require('cheerio'); // Installer Cheerio si besoin: npm install cheerio
 const supabase = require('../api/supabase')
+const { CAT_URL, CAT_FOLDER, CAT_I_VAR } = require('./utils/categories');
+
 
 function cleanPart(text) {
     // 1) Remove numbers
@@ -359,32 +361,38 @@ setTimeout(async () => {
         return { dataProduct };
     }
 
-    // Fonction récursive pour parcourir un répertoire et ses sous-répertoires
-    async function parseDirectory(directoryPath) {
-        // On liste le contenu du répertoire
-        const items = fs.readdirSync(directoryPath);
-        let _dataProduct = []
-        for (const item of items) {
-            const fullPath = path.join(directoryPath, item);
-            const stats = fs.statSync(fullPath);
+    async function processFolders() {
+        for (const folder of CAT_FOLDER) {
+            const folderPath = path.join(baseDir, folder);
+            console.log(`Traitement du dossier: ${folderPath}`);
 
-            if (stats.isDirectory()) {
-                // Si c'est un dossier, on le parcourt récursivement
-                parseDirectory(fullPath);
-            } else if (stats.isFile() && path.extname(item) === '.html') {
-                // Si c'est un fichier HTML, on le parse
-                const content = fs.readFileSync(fullPath, 'utf8');
+            // Accumule les produits extraits du dossier courant
+            let folderProducts = [];
 
-                // Extraire les données
-                const { dataProduct } = parseHtmlContent(content);
+            // On liste tous les éléments du dossier
+            const items = fs.readdirSync(folderPath);
+            for (const item of items) {
+                const fullPath = path.join(folderPath, item);
+                const stats = fs.statSync(fullPath);
 
-                // Afficher le résultat (ou l'enregistrer dans une base, un fichier JSON, etc.)
-                console.log(`Fichier analysé : ${fullPath}`);
-                console.log(dataProduct);
-                _dataProduct.push(...dataProduct)
+                // On traite uniquement les fichiers HTML
+                if (stats.isFile() && path.extname(item) === '.html') {
+                    const content = fs.readFileSync(fullPath, 'utf8');
+                    const { dataProduct } = parseHtmlContent(content);
+                    console.log(`Fichier analysé : ${fullPath}`);
+                    //console.log(dataProduct);
+                    folderProducts.push(...dataProduct);
+                }
+            }
+
+            // Insertion des données extraites pour le dossier courant (si elles existent)
+            if (folderProducts.length > 0) {
+                //console.log(`Insertion des données du dossier ${folderPath}`);
+                await saveProductAndPriceMetro(folderProducts);
+            } else {
+                console.log(`Aucune donnée trouvée dans le dossier ${folderPath}`);
             }
         }
-        await saveProductAndPriceMetro(_dataProduct)
     }
 
     async function saveProductAndPriceMetro(dataProduct) {
