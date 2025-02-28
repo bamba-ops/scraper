@@ -7,6 +7,11 @@ const supabase = require('../api/supabase')
 const { CAT_URL, CAT_FOLDER, CAT_I_VAR } = require('./utils/categories');
 
 
+function cleanBrand(brandText) {
+    // On retire les espaces suivis d'un ou plusieurs chiffres et d'une unité parmi mL, L ou g
+    return brandText.replace(/\s*\d+\s*(mL|L|g)\b/i, '').trim();
+}
+
 function cleanPart(text) {
     // 1) Remove numbers
     let textWithoutNumbers = text.replace(/\d+/g, '');
@@ -263,7 +268,7 @@ function parseHtmlContent(htmlContent) {
         const _brand = $(el).find('span');
         if (_brand.length > 0 || _title_unit.length > 0) {
             nameValue.push(handle_clean_text(_title_unit.text().trim()));
-            brandValue.push(handle_clean_text(_brand.text().trim()));
+            brandValue.push(cleanBrand(handle_clean_text(_brand.text().trim())));
             unitValue.push(
                 handle_extract_unit_and_value(
                     handle_clean_text(_title_unit.text().trim())
@@ -472,12 +477,12 @@ async function saveProductAndPriceMetro(dataProduct) {
     }
 }
 
-cron.schedule('0 0 * * *', async () => {
-    console.log(`[${new Date().toISOString()}] Lancement du job de parser...`);
-    // Exécuter le script
-    await processFolders();
+//cron.schedule('0 0 * * *', async () => {
+console.log(`[${new Date().toISOString()}] Lancement du job de parser...`);
+// Exécuter le script
+processFolders();
 
-});
+//});
 
 console.log(`[${new Date().toISOString()}] Job de parser lancé.`);
 
