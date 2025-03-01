@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 const { CAT_URL, CAT_FOLDER, CAT_I_VAR } = require('./utils/categories');
-const { cokies } = require('./utils/cookies')
+const { cookies } = require('./utils/cookies')
 
 
 //cron.schedule('0 23 * * *', async () => {
