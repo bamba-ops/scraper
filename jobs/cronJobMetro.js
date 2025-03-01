@@ -22,7 +22,7 @@ cron.schedule('0 23 * * *', async () => {
                 const baseUrl = "https://www.metro.ca/epicerie-en-ligne/allees";
                 const url = `${baseUrl}${CAT_URL[index]}`;
                 const url_page = `${baseUrl}${CAT_URL[index]}-page-${i}`;
-                const server_url = "http://localhost:3000/api/scrape";
+                const server_url = "http://localhost:80/api/scrape";
 
                 // Détermine l'URL à scraper selon la page
                 const target_url = i > 1 ? url_page : url;
