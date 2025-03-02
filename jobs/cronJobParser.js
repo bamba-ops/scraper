@@ -477,7 +477,7 @@ async function saveProductAndPriceMetro(dataProduct) {
     }
 }
 
-cron.schedule('0 0 * * *', async () => {
+cron.schedule('0 21 * * *', async () => {
     console.log(`[${new Date().toISOString()}] Lancement du job de parser...`);
     // Exécuter le script
     await processFolders();
