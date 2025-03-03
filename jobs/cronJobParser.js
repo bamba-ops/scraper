@@ -230,7 +230,7 @@ function handle_extract_prices_metro_2(data) {
 console.log(`[${new Date().toISOString()}] Lancement du job de scraping...`);
 
 // Répertoire racine à parcourir
-const baseDir = '/home/w_gharbi_tangerine/scraper/jobs/scrap_data';
+const baseDir = '/home/w_gharbi_tangerine/scraper/scrap_data';
 
 // Fonction de parsing: c'est ici que vous implémentez votre logique 
 // pour extraire les données du HTML. 
@@ -477,12 +477,14 @@ async function saveProductAndPriceMetro(dataProduct) {
     }
 }
 
-cron.schedule('0 21 * * *', async () => {
+//cron.schedule('0 21 * * *', async () => {
+setTimeout(async () => {
     console.log(`[${new Date().toISOString()}] Lancement du job de parser...`);
     // Exécuter le script
     await processFolders();
 
-});
+}, 5000);
+//});
 
 console.log(`[${new Date().toISOString()}] Job de parser lancé.`);
 
