@@ -477,14 +477,14 @@ async function saveProductAndPriceMetro(dataProduct) {
     }
 }
 
-//cron.schedule('0 21 * * *', async () => {
-setTimeout(async () => {
+cron.schedule('0 14 * * *', async () => {
+    //setTimeout(async () => {
     console.log(`[${new Date().toISOString()}] Lancement du job de parser...`);
     // Exécuter le script
     await processFolders();
 
-}, 5000);
-//});
+    //}, 5000);
+});
 
 console.log(`[${new Date().toISOString()}] Job de parser lancé.`);
 

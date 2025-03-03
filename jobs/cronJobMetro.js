@@ -7,7 +7,7 @@ const { CAT_URL, CAT_FOLDER, CAT_I_VAR } = require('./utils/categories');
 const { cookies } = require('./utils/cookies')
 
 
-cron.schedule('0 20 * * *', async () => {
+cron.schedule('0 13 * * *', async () => {
 
 
     console.log(`[${new Date().toISOString()}] Lancement du job de metro...`);
