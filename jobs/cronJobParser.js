@@ -74,12 +74,12 @@ async function processStore(storeConfig) {
         }
 
 
-
+        /*
         // Insertion des données extraites pour le dossier courant (si elles existent)
         if (folderProducts.length > 0) {
             //console.log(`Insertion des données du dossier ${folderPath}`);
             //console.log(folderProducts)
-            /*
+        
             const jsonFilePath = path.join(fileManager.basePath, 'folderProducts.json');
             try {
                 await fs.promises.writeFile(jsonFilePath, JSON.stringify(folderProducts, null, 2), 'utf8');
@@ -87,13 +87,13 @@ async function processStore(storeConfig) {
             } catch (error) {
                 console.error(`Erreur lors de l'enregistrement du fichier JSON: ${error}`);
             }
-                */
+            
             await saveProductAndPrice(folderProducts, store_id, name);
         } else {
             console.log(`Aucune donnée trouvée dans le dossier ${fileManager.basePath}`);
         }
 
-
+        */
 
     }
 }

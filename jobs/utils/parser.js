@@ -213,6 +213,9 @@ class Parser {
         const priceElements = container.find('div.pricing__secondary-price');
         const priceUnElements = container.find('div.pricing__sale-price');
 
+        const divProduct = container.find('div.default-product-tile.tile-product.item-addToCart.tabletRow')
+        console.log('Product Name :', divProduct.attr('data-product-name'))
+        console.log('Product Brand :', divProduct.attr('data-product-brand'))
         // -- 1) Loop over name elements --
         nameElements.each((_, el) => {
             const _title_unit = $(el).find('a');

@@ -118,5 +118,5 @@ const igaConfig = {
     CAT_I_VAR: [1115]
 };
 
-module.exports = [metroConfig, superCConfig, igaConfig];
-//module.exports = [igaConfig]
+//module.exports = [metroConfig, superCConfig, igaConfig];
+module.exports = [metroConfig]
