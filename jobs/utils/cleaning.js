@@ -330,6 +330,52 @@ class TextCleaner {
         return "";
     }
 
+    static extraire_prix_un_metro_string(prixString) {
+        // Vérifier le format "quantity / price $"
+        const promoMatch = prixString.match(/(\d+)\s*\/\s*([\d,]+)\s*\$/);
+        if (promoMatch) {
+            const quantite = promoMatch[1];
+            const prix = parseFloat(promoMatch[2].replace(',', '.'));
+            // Retourne une chaîne formatée, par exemple "2 / 10.99"
+            return `${quantite} / ${prix}`;
+        } else {
+            // Sinon, vérifier un format simple "9,50 $"
+            const simpleMatch = prixString.match(/([\d,]+)\s*\$/);
+            if (simpleMatch) {
+                const prix = parseFloat(simpleMatch[1].replace(',', '.'));
+                return `${prix}`;
+            }
+        }
+        // Si aucun format n'est reconnu, retourne une chaîne vide ou une valeur par défaut
+        return '';
+    }
+
+    static extraire_prix_un_metro_string_2(prix) {
+        let prixExtraits = null;
+
+        if (prix) {
+            // Check if the element matches "quantity / price $"
+            const match = prix.match(/(\d+)\s*\/\s*([\d,]+)\s*\$/);
+            if (match) {
+                // e.g., "2 / 10,99 $"
+                const quantite = match[1];
+                const prix = parseFloat(match[2].replace(',', '.'));
+                prixExtraits = [quantite, prix]
+            } else {
+                // Otherwise, check for a simpler price like "9,50 $"
+                const matchSimple = prix.match(/([\d,]+)\s*\$/);
+                if (matchSimple) {
+                    const prix = parseFloat(matchSimple[1].replace(',', '.'));
+                    prixExtraits = prix
+                }
+            }
+        }
+
+
+
+        return prixExtraits;
+    }
+
     static extraire_prix_un_metro(listePrix) {
         const prixExtraits = [];
 
@@ -352,6 +398,44 @@ class TextCleaner {
         }
 
         return prixExtraits;
+    }
+
+    static handle_standardize_units_2_string(data) {
+        if (data) {
+            // Convert the unit to lowercase for comparison
+            const unitLower = (data.unit || '').toLowerCase();
+            //console.log(data); // Equivalent to Python's print(data)
+
+            // 3) Case "g" => convert to "kg"
+            // Example logic: price per 100g => price per 1kg => multiply price by 10
+            // The Python code: (data["price"] * 1000) / 100 = data["price"] * 10
+            if (unitLower.includes('g') && unitLower !== 'kg') {
+                data.price = (data.price * 1000) / 100; // e.g., multiply by 10
+                data.unit = 'kg';
+            }
+
+            // 4) Case "kg" => do nothing
+
+            // 5) Case "ml" => convert to "L"
+            // The Python code: (data["price"] * 1000) / 100 = data["price"] * 10
+            // e.g., price for 100ml => price per 1L => multiply by 10
+            if (unitLower.includes('ml') && unitLower !== 'l') {
+                data.price = (data.price * 1000) / 100;
+                data.unit = 'L';
+            }
+
+            // If "lb" is found, remove price & unit
+            if (unitLower.includes('lb')) {
+                delete data.price;
+                delete data.unit;
+            }
+
+            // 6) Case "l" => set to "L"
+            if (unitLower === 'l') {
+                data.unit = 'L';
+            }
+        }
+        return data;
     }
 
     static handle_standardize_units_2(data) {
@@ -415,6 +499,45 @@ class TextCleaner {
         const pattern = /(kg|lb|g|ml|\d+g|\d+ml)(\d+,\d+)/gi;
         return line.replace(pattern, '$1 $2');
     }
+
+    static handle_extract_prices_metro_2_string(priceString) {
+        const pattern = new RegExp('(\\d+,\\d+)\\s*\\$\\s*/(\\w+)\\.?', 'i');
+
+        let cleanedData = null;
+
+        if (priceString) {
+            // 1) Remove "XX,XX $ ch."
+            priceString = TextCleaner.removeChPrices(priceString);
+
+            // 2) Separate "kg0,69" => "kg 0,69"
+            priceString = TextCleaner.separatePriceUnits(priceString);
+
+            // 3) Extract the prices with the pattern
+            // Use matchAll to find all matches in the priceString
+            const matches = priceString.matchAll(new RegExp(pattern, 'gi'));
+            for (const match of matches) {
+                // match[1] => price_str (e.g., "9,99")
+                // match[2] => unit_str  (e.g., "kg")
+                const priceStr = match[1];
+                const unitStr = match[2];
+
+                // Skip if the unit is "lb"
+                if (unitStr.toLowerCase().includes('lb')) {
+                    continue;
+                }
+
+                // Convert "9,99" to 9.99
+                const price = parseFloat(priceStr.replace(',', '.'));
+                cleanedData = { price, unit: unitStr };
+            }
+        }
+
+
+
+        return cleanedData;
+    }
+
+
 
     /**
      * 3) Extract "<price> $ /<unit>" occurrences

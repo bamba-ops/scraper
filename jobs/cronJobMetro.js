@@ -5,7 +5,7 @@ const FileManager = require('./models/FileManager')
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 //const { CAT_URL, CAT_FOLDER, CAT_I_VAR } = require('./utils/categories');
-const { cookies } = require('./utils/cookies');
+const { cookies, cookies_iga } = require('./utils/cookies');
 const storeConfigs = require('./utils/storeConfig'); // tableau de config pour chaque store
 
 const serverUrl = "http://localhost:80/api/scrape";
@@ -49,6 +49,8 @@ setTimeout(async () => {
                         ? `${baseUrl}/parcourir?page=${i}&pageSize=24`
                         : `${baseUrl}/parcourir`
                 }
+
+                console.log(pageUrl)
 
                 // Prépare le payload pour le scraping
                 const payload = {

@@ -46,11 +46,12 @@ class Parser {
 
             const price_per_unit = TextCleaner.convertPriceAndUnitIGA(TextCleaner.extractPriceAndUnitIGA(productPricePerUnit))
             const productPriceUnClean = Number((productPriceUn.replace('$', '').trim()).replace(',', '.'))
+            const productLinkClean = 'https://www.iga.net' + productLink
 
             /*
             console.log(`Produit ${index + 1}`);
             console.log('URL de l\'image :', imageUrl);
-            console.log('Lien du produit :', productLink);
+            console.log('Lien du produit :', productLinkClean);
             console.log('Nom du produit :', productName);
             console.log('Taille du produit :', productSize);
             console.log('Prix unitaire du produit :', productPriceUnClean)
@@ -73,6 +74,7 @@ class Parser {
                 brand: productBrand,
                 unit: productSize,
                 image_url: imageUrl,
+                link: productLinkClean,
                 priceObj: _price
             }
 
@@ -88,236 +90,175 @@ class Parser {
     static superCParser(htmlContent) {
         const $ = cheerio.load(htmlContent);
 
-        const nameValues = [];
-        const brandValues = [];
-        const unitValues = [];
-        const imgSrc = [];
-        const priceValues = [];
-        const priceUnValues = [];
-        const data = [];
-
-        const container = $('div.products-search--grid.searchOnlineResults').first();
-        if (!container.length) {
-            console.log("Auncu produit trouvé");
-            return data;
-        }
-
-        const pictureElements = container.find("picture.defaultable-picture");
-        const nameElements = container.find("div.content__head");
-        const priceElements = container.find("div.pricing__secondary-price");
-        const priceUnElements = container.find("div.pricing__sale-price");
-
-        // Process name and brand elements
-        nameElements.each((i, elem) => {
-            const titleUnit = $(elem).find("a").first();
-            const brand = $(elem).find("span").first();
-            if (titleUnit.length || brand.length) {
-                const titleText = TextCleaner.handleCleanText(titleUnit.text().trim());
-                nameValues.push(titleText);
-                brandValues.push(TextCleaner.handleCleanText(brand.text().trim()));
-                unitValues.push(TextCleaner.handleExtractUnitAndValue(titleText));
-            }
-        });
-
-        // Process picture elements
-        pictureElements.each((i, elem) => {
-            const img = $(elem).find("img").first();
-            if (img.length && img.attr("src")) {
-                imgSrc.push(img.attr("src"));
-            }
-        });
-
-        // Process price elements
-        priceElements.each((i, elem) => {
-            const priceSpan = $(elem).find("span").first();
-            if (priceSpan.length) {
-                priceValues.push(TextCleaner.handleCleanText(priceSpan.text().trim()));
-            }
-        });
-
-        // Process promotional price elements
-        priceUnElements.each((i, elem) => {
-            priceUnValues.push(TextCleaner.handleCleanText($(elem).text()));
-        });
-
-        if (priceValues.length !== nameValues.length || nameValues.length !== priceUnValues.length) {
-            console.warn("Les longueurs des tableaux extraits ne correspondent pas.");
-            return data;
-        }
-
-        // Only proceed if the lengths match
-        if (priceValues.length === nameValues.length && nameValues.length === priceUnValues.length) {
-            const standardizedPrices = TextCleaner.handleStandardizeUnitsMetro(TextCleaner.handleExtractPricesMetro(priceValues));
-            const extractedPriceUn = TextCleaner.extrairePrixDeListeSuperc(priceUnValues);
-
-            for (let i = 0; i < nameValues.length; i++) {
-                const price = standardizedPrices[i];
-                if (!price || typeof price.price !== 'number') {
-                    console.warn(`Donnée de prix manquante pour l'index ${i}. On ignore cet élément.`);
-                    continue;
-                }
-
-                price.price = Math.round(price.price * 100) / 100; // round to 2 decimals
-                const priceUn = extractedPriceUn[i];
-
-                const product = {
-                    name: nameValues[i],
-                    image_url: imgSrc[i],
-                    brand: brandValues[i],
-                    priceObj: price,
-                    unit: unitValues[i]
-                };
-
-                if (Array.isArray(priceUn)) {
-                    price.price_un = priceUn[1];
-                    price.quantity = priceUn[0];
-                    price.is_promo = true;
-                } else {
-                    price.price_un = priceUn;
-                    price.is_promo = false;
-                }
-                //console.log(price)
-                //console.log(product)
-                data.push(product);
-            }
-        }
-
-        //console.log(data);
-        return data;
-    }
-
-    static metroParser(htmlContent) {
-        const $ = cheerio.load(htmlContent);
-        // Equivalent to the Python lists
-        const nameValue = [];
-        const brandValue = [];
-        const unitValue = [];
-        const imgSrc = [];
-        const priceValue = [];
-        const dataProduct = [];
-        const dataPrice = [];
-        const priceUnValue = [];
-
+        const dataProducts = []
         // Equivalent to: container = soup.select_one("div.products-search--grid.searchOnlineResults")
         const container = $('div.products-search--grid.searchOnlineResults');
 
         // If container not found, return empty array
         if (!container || container.length === 0) {
             console.log('Aucun produit trouvé.');
-            return { dataProduct, dataPrice };
+            return dataProducts;
         }
 
-        // Equivalent to the Python "select" calls
-        const pictureElements = container.find('picture.defaultable-picture');
-        const nameElements = container.find('div.content__head');
-        const priceElements = container.find('div.pricing__secondary-price');
-        const priceUnElements = container.find('div.pricing__sale-price');
+        const container2 = $('div.products-search--grid.searchOnlineResults');
 
-        const divProduct = container.find('div.default-product-tile.tile-product.item-addToCart.tabletRow')
-        console.log('Product Name :', divProduct.attr('data-product-name'))
-        console.log('Product Brand :', divProduct.attr('data-product-brand'))
-        // -- 1) Loop over name elements --
-        nameElements.each((_, el) => {
-            const _title_unit = $(el).find('a');
-            const _brand = $(el).find('span');
-            if (_brand.length > 0 || _title_unit.length > 0) {
-                nameValue.push(TextCleaner.handle_clean_text(_title_unit.text().trim()));
-                brandValue.push(TextCleaner.cleanBrand(TextCleaner.handle_clean_text(_brand.text().trim())));
-                unitValue.push(
-                    TextCleaner.handle_extract_unit_and_value(
-                        TextCleaner.handle_clean_text(_title_unit.text().trim())
-                    )
-                );
-            }
-        });
+        // Sélectionne tous les produits
+        const products = container2.find('div.default-product-tile.tile-product.item-addToCart');
 
-        // -- 2) Loop over picture elements --
-        pictureElements.each((_, el) => {
-            const img = $(el).find('img');
-            if (img && img.attr('src')) {
-                imgSrc.push(img.attr('src'));
-            }
-        });
+        products.each((i, prodElem) => {
+            const $prod = $(prodElem);
+            const productName = $prod.attr('data-product-name') || null;
+            const productBrand = $prod.attr('data-product-brand') || null;
 
-        // -- 3) Loop over price elements --
-        priceElements.each((_, el) => {
-            // Python code uses price.text -> the entire text inside that element
-            priceValue.push($(el).text());
-        });
+            // Si plusieurs spans sont présents pour le produit, par exemple, on prend le premier :
+            const unitSpan = $prod.find('span.head__unit-details').first();
+            const pictureElem = $prod.find('picture.defaultable-picture').first();
+            const priceElem = $prod.find('div.pricing__secondary-price').first();
+            const urlElem = $prod.find('a.product-details-link').first();
+            const priceUnElem = $prod.find('div.pricing__sale-price').first();
 
-        // -- 4) Loop over price_un elements --
-        priceUnElements.each((_, el) => {
-            priceUnValue.push(TextCleaner.handle_clean_text($(el).text()));
-        });
+            const productPrice = priceElem.find('span').text().trim() || null;
+            const productImgUrl = pictureElem.find('img').attr('src') || null;
+            const productUnit = unitSpan.text().trim() || null;
+            const productURL = urlElem.attr('href') || null;
+            const productPriceUn = priceUnElem.text().trim() || null;
 
-        // Equivalent to price_un_value_extrait = extraire_prix_un_metro(price_un_value)
-        const priceUnValueExtrait = TextCleaner.extraire_prix_un_metro(priceUnValue);
+            const productPriceUnClean = TextCleaner.handle_clean_text(productPriceUn)
+            const productPriceUnClean2 = TextCleaner.extraire_prix_un_metro_string_2(productPriceUnClean)
+            const productPriceClean = TextCleaner.handle_extract_prices_metro_2_string(productPrice)
+            const productPriceClean2 = TextCleaner.handle_standardize_units_2_string(productPriceClean)
+            const productURLClean = 'https://www.superc.ca' + productURL
 
-        // Print out the zipped "price" and "price_extrait"
-        /*
-        for (let i = 0; i < priceUnValue.length; i++) {
-            console.log(`Price: ${priceUnValue[i]}\nPrice Extrait: ${priceUnValueExtrait[i]}`);
-        }
+            /*
+            console.log('Product Name :', productName);
+            console.log('Product Brand :', productBrand);
+            console.log('Product Unit :', productUnit);
+            console.log('Product imgUrl :', productImgUrl)
+            console.log('Product price :', productPriceClean2)
+            console.log('Product URL :', productURLClean)
+            console.log('Product price un :', productPriceUnClean2)
+            console.log('==========================================')
             */
 
-        if (priceValue.length === priceUnValueExtrait.length) {
-            const cleanedNameList = TextCleaner.clean_name_list(nameValue);
-            const standardizedPrices = TextCleaner.handle_standardize_units_2(
-                TextCleaner.handle_extract_prices_metro_2(priceValue)
-            );
 
-            for (let i = 0; i < priceValue.length; i++) {
-                const name = cleanedNameList[i];
-                const name_raw = nameValue[i];
-                const brand = brandValue[i];
-                const unit = unitValue[i];
-                const img = imgSrc[i];
-                const priceObj = standardizedPrices[i];
-                const price_extrait = priceUnValueExtrait[i];
-
-                // Si priceObj n'existe pas, on "skip" cette itération
-                if (!priceObj) {
-                    //console.log(`priceObj est undefined pour l'index ${i}. On ignore cet élément...`);
-                    continue; // Passe à l'itération suivante
+            let _price = {}
+            if (Array.isArray(productPriceUnClean2)) {
+                _price = {
+                    price: productPriceClean2 ? productPriceClean2.price : null,
+                    unit: productPriceClean2 ? productPriceClean2.unit : null,
+                    price_un: productPriceUnClean2 ? productPriceUnClean2[1] : null,
+                    quantity: productPriceUnClean2 ? productPriceUnClean2[0] : null,
+                    is_promo: true
                 }
-
-                //console.log(priceObj);
-
-                if (name && priceObj) {
-                    // Check if the extracted price is an array (promo) or not
-                    if (Array.isArray(price_extrait)) {
-                        // Example: price_extrait = [quantity, price_un]
-                        priceObj.price_un = price_extrait[1];
-                        priceObj.quantity = price_extrait[0];
-                        priceObj.is_promo = true;
-                        dataProduct.push({
-                            name,
-                            name_raw,
-                            image_url: img,
-                            brand,
-                            unit,
-                            priceObj
-                        });
-                    } else {
-                        // Non-promo
-                        //console.log('priceObj avant set :', priceObj);
-                        priceObj.price_un = price_extrait;
-                        priceObj.is_promo = false;
-                        dataProduct.push({
-                            name,
-                            name_raw,
-                            image_url: img,
-                            brand,
-                            unit,
-                            priceObj
-                        });
-                    }
+            } else {
+                _price = {
+                    price: productPriceClean2 ? productPriceClean2.price : null,
+                    unit: productPriceClean2 ? productPriceClean2.unit : null,
+                    price_un: productPriceUnClean2,
+                    is_promo: false
                 }
             }
-            //console.log(data);
+
+            const _product = {
+                name: productName,
+                brand: productBrand,
+                unit: productUnit,
+                image_url: productImgUrl,
+                link: productURLClean,
+                priceObj: _price
+            }
+
+            dataProducts.push(_product)
+        });
+
+        return dataProducts;
+    }
+
+    static metroParser(htmlContent) {
+        const $ = cheerio.load(htmlContent);
+
+        const dataProducts = []
+        // Equivalent to: container = soup.select_one("div.products-search--grid.searchOnlineResults")
+        const container = $('div.products-search--grid.searchOnlineResults');
+
+        // If container not found, return empty array
+        if (!container || container.length === 0) {
+            console.log('Aucun produit trouvé.');
+            return dataProducts;
         }
 
-        return { dataProduct };
+        const container2 = $('div.products-search--grid.searchOnlineResults');
+
+        // Sélectionne tous les produits
+        const products = container2.find('div.default-product-tile.tile-product.item-addToCart');
+
+        products.each((i, prodElem) => {
+            const $prod = $(prodElem);
+            const productName = $prod.attr('data-product-name') || null;
+            const productBrand = $prod.attr('data-product-brand') || null;
+
+            // Si plusieurs spans sont présents pour le produit, par exemple, on prend le premier :
+            const unitSpan = $prod.find('span.head__unit-details').first();
+            const pictureElem = $prod.find('picture.defaultable-picture').first();
+            const priceElem = $prod.find('div.pricing__secondary-price').first();
+            const urlElem = $prod.find('a.product-details-link').first();
+            const priceUnElem = $prod.find('div.pricing__sale-price').first();
+
+            const productPrice = priceElem.find('span').text().trim() || null;
+            const productImgUrl = pictureElem.find('img').attr('src') || null;
+            const productUnit = unitSpan.text().trim() || null;
+            const productURL = urlElem.attr('href') || null;
+            const productPriceUn = priceUnElem.text().trim() || null;
+
+            const productPriceUnClean = TextCleaner.handle_clean_text(productPriceUn)
+            const productPriceUnClean2 = TextCleaner.extraire_prix_un_metro_string_2(productPriceUnClean)
+            const productPriceClean = TextCleaner.handle_extract_prices_metro_2_string(productPrice)
+            const productPriceClean2 = TextCleaner.handle_standardize_units_2_string(productPriceClean)
+            const productURLClean = 'https://www.metro.ca' + productURL
+
+
+            /*
+            console.log('Product Name :', productName);
+            console.log('Product Brand :', productBrand);
+            console.log('Product Unit :', productUnit);
+            console.log('Product imgUrl :', productImgUrl)
+            console.log('Product price :', productPriceClean2)
+            console.log('Product URL :', productURLClean)
+            console.log('Product price un :', productPriceUnClean2)
+            console.log('==========================================')
+            */
+
+            let _price = {}
+            if (Array.isArray(productPriceUnClean2)) {
+                _price = {
+                    price: productPriceClean2 ? productPriceClean2.price : null,
+                    unit: productPriceClean2 ? productPriceClean2.unit : null,
+                    price_un: productPriceUnClean2 ? productPriceUnClean2[1] : null,
+                    quantity: productPriceUnClean2 ? productPriceUnClean2[0] : null,
+                    is_promo: true
+                }
+            } else {
+                _price = {
+                    price: productPriceClean2 ? productPriceClean2.price : null,
+                    unit: productPriceClean2 ? productPriceClean2.unit : null,
+                    price_un: productPriceUnClean2,
+                    is_promo: false
+                }
+            }
+
+            const _product = {
+                name: productName,
+                brand: productBrand,
+                unit: productUnit,
+                image_url: productImgUrl,
+                link: productURLClean,
+                priceObj: _price
+            }
+
+            dataProducts.push(_product)
+        });
+
+        return dataProducts;
     }
 }
 

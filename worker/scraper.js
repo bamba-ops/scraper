@@ -35,7 +35,14 @@ const log = (...args) => console.error(...args);
                 "--disable-extensions",
                 "--disable-dev-shm-usage",
                 "--no-sandbox",
-            ]
+            ],
+            /*
+            proxy: {
+                server: 'http://3zyjoyw5.na.piaproxy.co:5000',
+                username: 'user-bamba_M3ppH-region-ca-st-quebec-city-montréal',
+                password: 'Bambalerequin99'
+            }
+                */
         });
 
 
@@ -45,33 +52,24 @@ const log = (...args) => console.error(...args);
             viewport: { width: 1366, height: 768 }
         });
 
-
         const page = await context.newPage();
 
-        await page.addInitScript(() => {
-            // Masquer la propriété navigator.webdriver
-            Object.defineProperty(navigator, 'webdriver', {
-                get: () => false,
-            });
-            // Simuler la présence de plugins
-            Object.defineProperty(navigator, 'plugins', {
-                get: () => [1, 2, 3, 4, 5],
-            });
-            // Définir les langues du navigateur
-            Object.defineProperty(navigator, 'languages', {
-                get: () => ['fr-FR', 'fr'],
-            });
-        });
 
         //log(`🔗  Navigating to ${url}...`);
         if (req.cookies) {
             await page.context().addCookies(req.cookies);
             //log(`🍪  ${cookies.length} cookie(s) ajoutés au contexte.`);
         }
+
         await page.goto(req.url, { waitUntil: 'domcontentloaded' });
         if (req.waitForSelector) {
             await page.waitForSelector(req.waitForSelector);
         }
+
+        if (req.wait) {
+            await new Promise(resolve => setTimeout(resolve, req.wait));
+        }
+
         const htmlContent = await page.content();
 
         await context.clearCookies();

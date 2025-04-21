@@ -12,6 +12,7 @@ module.exports = {
             instances: 1,
 
         },
+        /*
         {
             name: 'cron-metro',
             script: './jobs/cronJobMetro.js',
@@ -22,5 +23,6 @@ module.exports = {
             script: './jobs/cronJobParser.js',
             instances: 1
         }
+            */
     ]
 };
